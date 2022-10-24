@@ -4,7 +4,7 @@
 
 
 
-#define N 10000000
+#define N 1000
 #define K 4
 #define POINTSIZE 4 // x,y,centroid,minDist
 #define CENTROIDSIZE 5
@@ -53,7 +53,7 @@ double calcDist(float x1, float y1, float x2, float y2){
 
 void changeCentroid(int pIndex, float  cIndex, double pDist){
 
-    int oldCentroid = points[pIndex * POINTSIZE + 2];
+    int oldCentroid = (int) points[pIndex * POINTSIZE + 2];
 
     // Mudanças no ponto
     points[pIndex * POINTSIZE + 2] = cIndex;

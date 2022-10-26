@@ -1,12 +1,11 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 
 
 
-#define N 10
+#define N 10000000
 #define K 4
-#define MAXDIST 5000000000
+#define MAXDIST 5000000000000
 
 
 
@@ -27,7 +26,7 @@ struct Centroid{
 
 struct Point *points;
 struct Centroid *centroids;
-int iterations = 0;
+int iterations = 1;
 
 
 void alloc(){
@@ -82,70 +81,79 @@ void changePointsCentroid(int pIndex, int  cIndex){
 
 
 
-void updateCentroidCoord(){
-
+int updateCentroidCoord(iterations){
+    int changed = 0;
     for(int j=0; j<K ; j++){
-
-        if(centroids[j].points != 0){
-
+            
             float newX = centroids[j].sumX / centroids[j].points;
             float newY = centroids[j].sumY / centroids[j].points;
+            
+            if (centroids[j].x != newX || centroids[j].y != newY){
+                changed =1;
+            }
 
             centroids[j].x = newX;
             centroids[j].y = newY;
             centroids[j].points = 0;
-            centroids[j].sumX = 0;
-            centroids[j].sumY = 0;
-        }
+            centroids[j].sumX = 0.0;
+            centroids[j].sumY = 0.0;
     }
-
+    return changed;
 }
 
-float getNewDist(int i){
+void getNewDist(int i){
 
     int cIndex = points[i].centroid;
 
-    if(cIndex != -1)
+    if(cIndex != -1) 
         points[i].minDist = calcDist(points[i].x,points[i].y,centroids[cIndex].x,centroids[cIndex].y);
 
+}
+
+int getMin(int i){
+
+    int index = points[i].centroid;
+    float newDist;
+
+    for(int j=0; j<K; j++){
+
+        newDist = calcDist(points[i].x , points[i].y ,centroids[j].x, centroids[j].y);
+
+        if(points[i].minDist > newDist) {
+            points[i].minDist = newDist;
+            index = j;
+        }            
+    }
+
+    return index;
 }
 
 
 void kmeans(){
 
     int changed = 1;
+    int index;
+    float newDist = 0;
 
     while(changed){
 
-        float newDist;
-        int index;
-        int changedPoint;
-        changed = 0;
+
+        if(points[0].centroid!=-1){
+            changed = updateCentroidCoord(iterations);
+
+            if (changed)
+                iterations++;
+        }
 
         for(int i=0 ; i<N; i++){
 
-            changedPoint = 0;
-            getNewDist(i);
-            printf("%d\n",i);
             
-            for(int j=0; j< K; j++ ){
-                newDist = calcDist(points[i].x , points[i].y ,centroids[j].x, centroids[j].y);
+            getNewDist(i);
 
-                if(points[i].minDist >= newDist) {
-                    index = j;
-                    changed = 1;
-                    changedPoint = 1;
-                }            
-            }
-
-            if(changedPoint == 1){
-                changePointsCentroid( i , index);
-            }
-
+            index = getMin(i);
+            
+            changePointsCentroid( i , index);
         }
-
-        updateCentroidCoord();
-        iterations++;
 
     }   
 }
@@ -167,5 +175,3 @@ int main(){
     kmeans();
     print();
 }
-
-

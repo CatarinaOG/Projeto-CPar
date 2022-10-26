@@ -4,7 +4,7 @@
 
 
 
-#define N 10
+#define N 10000000
 #define K 4
 #define MAXDIST 5000000000
 
@@ -43,7 +43,7 @@ void init(){
     
     for( int i=0 ; i < N; i++ ){
         points[i].x = (float) rand() / RAND_MAX;
-        points[i].y = (float) rand()/ RAND_MAX;
+        points[i].y = (float) rand() / RAND_MAX;
         points[i].centroid = -1;
         points[i].minDist = MAXDIST;
 
@@ -72,6 +72,11 @@ void changePointsCentroid(int pIndex, int  cIndex){
     // Mudanças no ponto
     points[pIndex].centroid = cIndex;
 
+     // Mudanças no centroid atual
+    /*centroids[oldCentroid].points--;
+    centroids[oldCentroid].sumX -= points[pIndex].x;
+    centroids[oldCentroid].sumY -= points[pIndex].y;
+*/
     // Mudanças no centroid atual
     centroids[cIndex].points++;
     centroids[cIndex].sumX += points[pIndex].x;
@@ -93,20 +98,21 @@ void updateCentroidCoord(){
 
             centroids[j].x = newX;
             centroids[j].y = newY;
-            centroids[j].points = 0;
-            centroids[j].sumX = 0;
-            centroids[j].sumY = 0;
-        }
-    }
 
+            centroids[j].sumX=0;
+            centroids[j].sumY=0;
+            centroids[j].points=0;
+        }
+
+    }
 }
 
 float getNewDist(int i){
 
-    int cIndex = points[i].centroid;
+    //int cIndex = points[i].centroid;
 
-    if(cIndex != -1)
-        points[i].minDist = calcDist(points[i].x,points[i].y,centroids[cIndex].x,centroids[cIndex].y);
+    //if(cIndex != -1)
+        points[i].minDist = 10;//calcDist(points[i].x,points[i].y,centroids[cIndex].x,centroids[cIndex].y);
 
 }
 
@@ -126,25 +132,30 @@ void kmeans(){
 
             changedPoint = 0;
             getNewDist(i);
-            printf("%d\n",i);
+            float min = points[i].minDist;
             
             for(int j=0; j< K; j++ ){
                 newDist = calcDist(points[i].x , points[i].y ,centroids[j].x, centroids[j].y);
 
-                if(points[i].minDist >= newDist) {
+                //if(points[i].centroid != j && min > newDist) {
+                if( min > newDist) {
                     index = j;
-                    changed = 1;
-                    changedPoint = 1;
+                    min = newDist;
+                    if(points[i].centroid != j){
+                         changed = 1;
+                        changedPoint = 1;
+                    }
                 }            
             }
 
-            if(changedPoint == 1){
+            if(changedPoint == 1)
                 changePointsCentroid( i , index);
-            }
+            
 
         }
 
         updateCentroidCoord();
+    
         iterations++;
 
     }   

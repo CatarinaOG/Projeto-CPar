@@ -147,12 +147,11 @@ void kmeans(){
 
         for(int i=0 ; i<N; i++){
 
-            
             getNewDist(i);
 
             index = getMin(i);
             
-            changePointsCentroid( i , index);
+            changePointsCentroid(i, index);
         }
 
     }   

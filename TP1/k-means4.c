@@ -109,10 +109,10 @@ void updateCentroidCoord(){
 
 float getNewDist(int i){
 
-    //int cIndex = points[i].centroid;
+    int cIndex = points[i].centroid;
 
-    //if(cIndex != -1)
-        points[i].minDist = 10;//calcDist(points[i].x,points[i].y,centroids[cIndex].x,centroids[cIndex].y);
+    if(cIndex != -1)
+        points[i].minDist = calcDist(points[i].x,points[i].y,centroids[cIndex].x,centroids[cIndex].y);
 
 }
 

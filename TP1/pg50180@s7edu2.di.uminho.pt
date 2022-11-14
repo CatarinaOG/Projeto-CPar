@@ -9,18 +9,18 @@
 
 
 struct Point{
-    float* x;
-    float* y;
-    int* centroid;
-    float* minDist;
+    float x[N] __attribute__ ((aligned(32)));
+    float y[N] __attribute__ ((aligned(32)));
+    int centroid[N] __attribute__ ((aligned(32)));
+    float minDist[N] __attribute__ ((aligned(32)));
 };
 
 struct Centroid{
-    float* x;
-    float* y;
-    int* points;
-    float* sumX;
-    float* sumY;
+    float x[N] __attribute__ ((aligned(32)));
+    float y[N] __attribute__ ((aligned(32)));
+    int points[N] __attribute__ ((aligned(32)));
+    float sumX[N] __attribute__ ((aligned(32)));
+    float sumY[N] __attribute__ ((aligned(32)));
 };
 
 struct Point points;
@@ -28,21 +28,6 @@ struct Centroid centroids;
 
 int iterations = 0;
 
-
-void alloc(){
-
-    points.x = (float*) malloc(N * sizeof(float));
-    points.y = (float*) malloc(N * sizeof(float));
-    points.centroid = (int*) malloc(N * sizeof(int));
-    points.minDist = (float*) malloc(N * sizeof(float));
-
-    centroids.x = (float*) malloc(N * sizeof(float));
-    centroids.y = (float*) malloc(N * sizeof(float));
-    centroids.points = (int*) malloc(N * sizeof(int));
-    centroids.sumX = (float*) malloc(N * sizeof(float));
-    centroids.sumY = (float*) malloc(N * sizeof(float));
-
-}
 
 void init(){
 
@@ -150,7 +135,6 @@ void print(){
 
 
 int main(){
-    alloc();
     init();
     kmeans();
     print();

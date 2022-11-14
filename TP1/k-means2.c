@@ -43,7 +43,7 @@ void init(){
     
     for( int i=0 ; i < N; i++ ){
         points[i].x = (float) rand() / RAND_MAX;
-        points[i].y = (float) rand()/ RAND_MAX;
+        points[i].y = (float) rand() / RAND_MAX;
         points[i].centroid = -1;
         points[i].minDist = MAXDIST;
 
@@ -98,7 +98,6 @@ void updateCentroidCoord(){
             centroids[j].sumY = 0;
         }
     }
-
 }
 
 float getNewDist(int i){
@@ -126,12 +125,11 @@ void kmeans(){
 
             changedPoint = 0;
             getNewDist(i);
-            printf("%d\n",i);
             
             for(int j=0; j< K; j++ ){
                 newDist = calcDist(points[i].x , points[i].y ,centroids[j].x, centroids[j].y);
 
-                if(points[i].minDist >= newDist) {
+                if(points[i].minDist > newDist) {
                     index = j;
                     changed = 1;
                     changedPoint = 1;

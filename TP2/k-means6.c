@@ -44,12 +44,15 @@ void init(){
 
     srand(10);
 
+    // Paralelização...
+    #pragma omp parallel for
     for( int i=0 ; i < N; i++ ){
         points.x[i] = (float) rand() / RAND_MAX;
         points.y[i] = (float) rand() / RAND_MAX;
         points.centroid[i] = 0;
     }
 
+    
     for(int i=0; i < K ; i++){
         centroids.x[i] = points.x[i];
         centroids.y[i] = points.y[i];
@@ -106,6 +109,8 @@ void kmeans(){
         changedCentroid = 0;
 
         // Atribuit um centroid a cada ponto
+        // Paralelização...
+        #pragma omp parallel for
         for(int i=0 ; i<N; i++){
 
             
@@ -135,7 +140,7 @@ void kmeans(){
 
         iterations++;
 
-    } while(changedCentroid);
+    } while(changedCentroid && iterations < 20);
 }
 
 

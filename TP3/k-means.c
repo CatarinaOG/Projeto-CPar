@@ -211,7 +211,7 @@ void print(){
 int main(int argc, char *argv[]) {
     MPI_Status status;
     long long int papi_results_local[2], papi_results_global[2], papi_results_global2[5];
-    int events[2] = { PAPI_TOT_INS, /*PAPI_TOT_CYC ,PAPI_L1_DCM,PAPI_L2_TCM,PAPI_L3_TCM*/ };
+    int events[2] = { PAPI_TOT_INS, PAPI_TOT_CYC /*,PAPI_L1_DCM,PAPI_L2_TCM,PAPI_L3_TCM*/ };
 
     double start_time, end_time;    
 
@@ -229,7 +229,7 @@ int main(int argc, char *argv[]) {
     int event_set = PAPI_NULL;
     PAPI_create_eventset(&event_set);
 
-    if (PAPI_add_events(event_set, events, 2)!= PAPI_OK) printf("FODASSSEEEEEE\n\n\n");
+    if (PAPI_add_events(event_set, events, 2)!= PAPI_OK) printf("Erro\n\n\n");
 
 
     PAPI_start(event_set);
@@ -243,9 +243,9 @@ int main(int argc, char *argv[]) {
     kmeans();
     PAPI_stop(event_set, papi_results_local);   
 
-        printf("RANK : %d  ------  instructions: %lld\n",rank, papi_results_local[0]);
-        printf("RANK : %d  ------  cycles: %lld\n",rank, papi_results_local[1]);
-        printf("RANK : %d  ------  L1 Cache Misses: %lld\n",rank, papi_results_local[2]);
+        //printf("RANK : %d  ------  instructions: %lld\n",rank, papi_results_local[0]);
+        //printf("RANK : %d  ------  cycles: %lld\n",rank, papi_results_local[1]);
+        //printf("RANK : %d  ------  L1 Cache Misses: %lld\n",rank, papi_results_local[2]);
         //printf("RANK : %d  ------  L2 Cache Misses: %lld\n",rank, papi_results_local[3]);
 
         //printf("RANK : %d  ------  L3 Cache Misses: %lld\n",rank, papi_results_local[4]);

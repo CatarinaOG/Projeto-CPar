@@ -4,6 +4,7 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <papi.h>
 
 #define N 10000000
 #define K 4
@@ -36,6 +37,7 @@ MPI_Datatype dt_point;
 MPI_Datatype dt_centroid;
 
 MPI_Op sum_centroids_op;
+MPI_Op papi_reducee;
 
 
 void alloc(){
@@ -80,6 +82,16 @@ void centroid_reduce_function( void * in, void * out, int * len, MPI_Datatype *d
         out_data[i].sumX += in_data[i].sumX;
         out_data[i].sumY += in_data[i].sumY;
         out_data[i].points += in_data[i].points;
+     }
+}
+
+void papi_reduce_function( void * in, void * out, int * len, MPI_Datatype *datatype){
+
+    long long int* in_data = (long long int *) in;
+    long long int* out_data = (long long int *)out;
+
+     for(int i=0; i< 5 ; i++){
+        out_data[i] += in_data[i];
      }
 }
 
@@ -198,10 +210,30 @@ void print(){
 
 int main(int argc, char *argv[]) {
     MPI_Status status;
-    
+    long long int papi_results_local[2], papi_results_global[2], papi_results_global2[5];
+    int events[2] = { PAPI_TOT_INS, /*PAPI_TOT_CYC ,PAPI_L1_DCM,PAPI_L2_TCM,PAPI_L3_TCM*/ };
+
+    double start_time, end_time;    
+
+
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+
+    MPI_Op_create(papi_reduce_function,0,&papi_reducee);
+
+
+    start_time = MPI_Wtime();
+
+    PAPI_library_init(PAPI_VER_CURRENT);
+    int event_set = PAPI_NULL;
+    PAPI_create_eventset(&event_set);
+
+    if (PAPI_add_events(event_set, events, 2)!= PAPI_OK) printf("FODASSSEEEEEE\n\n\n");
+
+
+    PAPI_start(event_set);
+
 
     alloc();
 
@@ -209,9 +241,44 @@ int main(int argc, char *argv[]) {
         init();
 
     kmeans();
-    
-    if(rank == 0) 
+    PAPI_stop(event_set, papi_results_local);   
+
+        printf("RANK : %d  ------  instructions: %lld\n",rank, papi_results_local[0]);
+        printf("RANK : %d  ------  cycles: %lld\n",rank, papi_results_local[1]);
+        printf("RANK : %d  ------  L1 Cache Misses: %lld\n",rank, papi_results_local[2]);
+        //printf("RANK : %d  ------  L2 Cache Misses: %lld\n",rank, papi_results_local[3]);
+
+        //printf("RANK : %d  ------  L3 Cache Misses: %lld\n",rank, papi_results_local[4]);
+
+    MPI_Reduce(papi_results_local, papi_results_global,2, MPI_LONG_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
+    //MPI_Reduce(papi_results_local,papi_results_global2,5,MPI_LONG_LONG,papi_reducee,0,MPI_COMM_WORLD);
+
+
+
+
+    end_time = MPI_Wtime();
+
+    if(rank == 0){
         print();
+        printf("Total instructions: %lld\n", papi_results_global[0]);
+        //printf("2    Total instructions: %lld\n", papi_results_global2[0]);
+
+        printf("Total cycles: %lld\n", papi_results_global[1]);
+        //printf("2    Total cycles: %lld\n", papi_results_global2[1]);
+/*
+        printf("Total L1 Cache Misses: %lld\n", papi_results_global[2]);
+        //printf("2    Total L1 Cache Misses: %lld\n", papi_results_global2[2]);
+
+        printf("Total L2 Cache Misses: %lld\n", papi_results_global[3]);
+        //printf("2    Total L2 Cache Misses: %lld\n", papi_results_global2[3]);
+
+        printf("Total L3 Cache Misses: %lld\n", papi_results_global[4]);
+        //printf("2    Total L3 Cache Misses: %lld\n", papi_results_global2[4]);
+*/
+        printf("Execution time: %f\n", end_time - start_time);
+    }
+    PAPI_cleanup_eventset(event_set);
+    PAPI_destroy_eventset(&event_set);
     
     MPI_Finalize();
     
